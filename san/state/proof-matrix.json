@@ -1,0 +1,164 @@
+{
+  "generatedAt": "2026-04-13T16:07:31.320Z",
+  "entries": [
+    {
+      "id": "claim.boot.local",
+      "claim": "The app boots locally on this PC from a clean-ish repo state using documented commands.",
+      "status": "verified",
+      "evidencePaths": [
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\summary.md",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\stdout.log",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\commands\\build.stdout.log"
+      ],
+      "lastVerifiedAt": "2026-04-13T15:45:02.724Z",
+      "runIds": [
+        "full-80b1451c"
+      ],
+      "blockingGap": null,
+      "notes": [
+        "Evidence runner built the app and started the production server on port 3300."
+      ]
+    },
+    {
+      "id": "claim.surfaces.endToEnd",
+      "claim": "The 7 CMEP v1 surfaces work end-to-end locally across the accountable happy path.",
+      "status": "verified",
+      "evidencePaths": [
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\screenshots",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\playwright-trace.zip",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\scenario-results.json"
+      ],
+      "lastVerifiedAt": "2026-04-13T15:45:02.724Z",
+      "runIds": [
+        "full-80b1451c"
+      ],
+      "blockingGap": null,
+      "notes": [
+        "Mission control, catalog, customer graph, inbox, lifecycle, automations, schedule, revenue, and portal were exercised in one run."
+      ]
+    },
+    {
+      "id": "claim.tenantIsolation",
+      "claim": "Tenant isolation holds across the main read/write paths.",
+      "status": "verified",
+      "evidencePaths": [
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\scenario-results.json",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\screenshots\\customers-list.png",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\screenshots\\catalog-home.png"
+      ],
+      "lastVerifiedAt": "2026-04-13T15:45:02.724Z",
+      "runIds": [
+        "full-80b1451c"
+      ],
+      "blockingGap": null,
+      "notes": [
+        "Signal tenant received a 404 on a tampered Northstar customer update attempt.",
+        "Northstar global search returned zero catalog/offering results for the Signal-only evidence offering."
+      ]
+    },
+    {
+      "id": "claim.portalScoping",
+      "claim": "Portal/client scoping does not leak cross-client or cross-tenant data.",
+      "status": "verified",
+      "evidencePaths": [
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\scenario-results.json",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\screenshots\\client-portal-signal.png",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\screenshots\\client-portal.png"
+      ],
+      "lastVerifiedAt": "2026-04-13T15:45:02.724Z",
+      "runIds": [
+        "full-80b1451c"
+      ],
+      "blockingGap": null,
+      "notes": [
+        "Ava's portal view did not expose the Signal-only evidence offering.",
+        "Zoe portal access was denied when tampering against Ava's conversation and quote."
+      ]
+    },
+    {
+      "id": "claim.dbDeterminism",
+      "claim": "The Windows-local DB bootstrap/reset path is deterministic enough for repeatable verification.",
+      "status": "verified",
+      "evidencePaths": [
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\state-reset-a.json",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\state-reset-b.json",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\state-before.json"
+      ],
+      "lastVerifiedAt": "2026-04-13T15:45:02.724Z",
+      "runIds": [
+        "full-80b1451c"
+      ],
+      "blockingGap": null,
+      "notes": [
+        "Reset A fingerprint: 1780421717804217",
+        "Reset B fingerprint: 1780421717804217",
+        "Reset command exit codes: A=0, B=0, final=0"
+      ]
+    },
+    {
+      "id": "claim.runtimeIntegrity",
+      "claim": "There are no silent runtime blockers, hidden hydration problems, or dead critical controls in the primary flows.",
+      "status": "verified",
+      "evidencePaths": [
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\exception.json",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\exceptions.jsonl",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\summary.md"
+      ],
+      "lastVerifiedAt": "2026-04-13T15:45:02.724Z",
+      "runIds": [
+        "full-80b1451c"
+      ],
+      "blockingGap": null,
+      "notes": [
+        "Runtime integrity excludes expected guard-denial probes and requires zero unexpected page/server errors plus a passing accountable flow.",
+        "Expected guard denials: 3",
+        "Unexpected server exceptions: 0"
+      ]
+    },
+    {
+      "id": "claim.oracleOfflineReview",
+      "claim": "Oracle can review the repo and a run bundle offline, without guesswork, and determine what happened.",
+      "status": "verified",
+      "evidencePaths": [
+        "artifacts\\oracle\\20260413-160646Z-cmep-accountability\\bundle-manifest.json",
+        "artifacts\\oracle\\20260413-160646Z-cmep-accountability\\bundle-summary.md",
+        "artifacts\\oracle\\20260413-160646Z-cmep-accountability\\oracle-command.ps1.txt",
+        "artifacts\\oracle\\20260413-160646Z-cmep-accountability\\oracle-render.md"
+      ],
+      "lastVerifiedAt": "2026-04-13T16:07:31.319Z",
+      "runIds": [
+        "full-80b1451c"
+      ],
+      "blockingGap": null,
+      "notes": [
+        "Curated Oracle bundle includes repo truth surfaces, source, scripts, and the latest accountable run artifacts.",
+        "A local review bundle was emitted and checksum-verified; the machine-specific path is intentionally omitted from the public export."
+      ]
+    },
+    {
+      "id": "claim.offeringSpine",
+      "claim": "CMEP has a first-class offering/catalog spine and the core business flows route through it end-to-end.",
+      "status": "verified",
+      "evidencePaths": [
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\screenshots\\catalog-home.png",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\screenshots\\offering-detail.png",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\screenshots\\customer-detail.png",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\screenshots\\client-portal.png",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\state-before.json",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\state-after.json",
+        "artifacts\\runs\\20260413-154338Z-full-full-80b1451c\\scenario-results.json"
+      ],
+      "lastVerifiedAt": "2026-04-13T15:45:02.724Z",
+      "runIds": [
+        "full-80b1451c"
+      ],
+      "blockingGap": null,
+      "notes": [
+        "The accountable flow created a new service offering, added a variant, versioned pricing, assigned a catalog, created lifecycle and revenue records through that offering, and exposed the result in the portal.",
+        "Signal offering counts: 10 -> 11",
+        "Signal catalog assignments: 4 -> 5",
+        "Signal customer-offering links: 11 -> 12"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  STAFF
+  CLIENT
+}
+
+enum CustomerStatus {
+  ACTIVE
+  PROSPECT
+  AT_RISK
+  ARCHIVED
+}
+
+enum LifecycleStageKind {
+  ACTIVE
+  WON
+  LOST
+  RESOLVED
+}
+
+enum LifecycleItemStatus {
+  ACTIVE
+  ON_HOLD
+  WON
+  LOST
+  RESOLVED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ConversationChannel {
+  EMAIL
+  CHAT
+  SMS
+}
+
+enum ConversationStatus {
+  OPEN
+  PENDING
+  WAITING_ON_CLIENT
+  CLOSED
+}
+
+enum ConversationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum MessageAuthorType {
+  USER
+  CLIENT
+  SYSTEM
+  AI
+}
+
+enum ActivityKind {
+  NOTE
+  MESSAGE
+  TASK
+  BOOKING
+  QUOTE
+  INVOICE
+  FILE
+  STATUS
+  AUTOMATION
+}
+
+enum AutomationTriggerType {
+  STAGE_CHANGED
+  MESSAGE_RECEIVED
+  NO_REPLY_DAYS
+  BOOKING_CREATED
+  INVOICE_OVERDUE
+  QUOTE_APPROVED
+  OFFERING_REQUESTED
+  QUOTE_CREATED_FOR_OFFERING
+  QUOTE_APPROVED_FOR_OFFERING
+  CUSTOMER_OFFERING_STATUS_CHANGED
+}
+
+enum AutomationRunStatus {
+  SIMULATED
+  APPLIED
+  SKIPPED
+  FAILED
+}
+
+enum BookingStatus {
+  SCHEDULED
+  RESCHEDULED
+  CANCELLED
+  COMPLETED
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  OVERDUE
+  PAID
+}
+
+enum RecurringAgreementStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+enum BillingCadence {
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
+enum NotificationKind {
+  REMINDER
+  AUTOMATION
+  BOOKING
+  REVENUE
+  SYSTEM
+}
+
+enum OfferingType {
+  PRODUCT
+  SERVICE
+  BUNDLE
+}
+
+enum OfferingStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum OfferingMediaKind {
+  HERO
+  GALLERY
+  ICON
+}
+
+enum OfferingPriceBillingModel {
+  ONE_TIME
+  RECURRING
+  TIERED_SIMPLE
+  NEGOTIATED_OVERRIDE_SUPPORT
+}
+
+enum CatalogType {
+  MASTER
+  SEGMENT
+  CUSTOMER
+  PORTAL
+}
+
+enum BundleItemRequirement {
+  INCLUDED
+  REQUIRED
+  OPTIONAL
+}
+
+enum CustomerOfferingStatus {
+  AVAILABLE
+  PROPOSED
+  QUOTED
+  BOOKED
+  PURCHASED
+  ACTIVE
+  SUBSCRIBED
+  DELIVERED
+  PAUSED
+  LAPSED
+  BLOCKED
+  ARCHIVED
+}
+
+enum CustomerOfferingSourceType {
+  CATALOG
+  QUOTE
+  BOOKING
+  INVOICE
+  MANUAL
+  IMPORT
+  AUTOMATION
+  BACKFILL
+}
+
+model Tenant {
+  id                    String                 @id
+  slug                  String                 @unique
+  name                  String
+  description           String
+  vibe                  String
+  primaryColor          String
+  accentColor           String
+  gradientFrom          String
+  gradientTo            String
+  coverImagePath        String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  memberships           Membership[]
+  contacts              Contact[]
+  organizations         Organization[]
+  offerings             Offering[]
+  offeringMedia         OfferingMedia[]
+  offeringVariants      OfferingVariant[]
+  offeringPrices        OfferingPrice[]
+  catalogs              Catalog[]
+  catalogAssignments    CatalogAssignment[]
+  catalogItems          CatalogItem[]
+  offeringBundleItems   OfferingBundleItem[]
+  offeringRouteBindings OfferingRouteBinding[]
+  customerOfferingLinks CustomerOfferingLink[]
+  activities            Activity[]
+  notes                 Note[]
+  conversations         Conversation[]
+  messages              Message[]
+  attachments           Attachment[]
+  pipelineTemplates     PipelineTemplate[]
+  pipelineStages        PipelineStage[]
+  lifecycleItems        LifecycleItem[]
+  tasks                 Task[]
+  automationRules       AutomationRule[]
+  automationRuns        AutomationRun[]
+  bookingTypes          BookingType[]
+  bookings              Booking[]
+  intakeForms           IntakeForm[]
+  intakeSubmissions     IntakeSubmission[]
+  quotes                Quote[]
+  invoices              Invoice[]
+  recurringAgreements   RecurringAgreement[]
+  files                 FileAsset[]
+  notifications         Notification[]
+  portalAccesses        PortalAccess[]
+  cannedReplies         CannedReply[]
+}
+
+model User {
+  id          String       @id
+  name        String
+  email       String       @unique
+  initials    String
+  avatarTone  String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  memberships Membership[]
+}
+
+model Membership {
+  id        String         @id
+  tenantId  String
+  userId    String
+  role      MembershipRole
+  title     String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId])
+  @@index([tenantId, role])
+}
+
+model Organization {
+  id                    String                 @id
+  tenantId              String
+  name                  String
+  industry              String
+  website               String?
+  city                  String?
+  status                CustomerStatus
+  segment               String
+  lifecycleStage        String
+  ownerUserId           String
+  summary               String
+  tags                  Json
+  customFields          Json
+  archivedAt            DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contacts              Contact[]
+  catalogAssignments    CatalogAssignment[]
+  customerOfferingLinks CustomerOfferingLink[]
+  activities            Activity[]
+  notes                 Note[]
+  conversations         Conversation[]
+  lifecycleItems        LifecycleItem[]
+  tasks                 Task[]
+  bookings              Booking[]
+  quotes                Quote[]
+  invoices              Invoice[]
+  files                 FileAsset[]
+  portalAccesses        PortalAccess[]
+  recurringAgreements   RecurringAgreement[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, ownerUserId])
+}
+
+model Contact {
+  id                    String                 @id
+  tenantId              String
+  organizationId        String?
+  firstName             String
+  lastName              String
+  displayName           String
+  email                 String
+  phone                 String?
+  title                 String?
+  city                  String?
+  status                CustomerStatus
+  segment               String
+  lifecycleStage        String
+  ownerUserId           String
+  summary               String
+  tags                  Json
+  customFields          Json
+  archivedAt            DateTime?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  tenant                Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  organization          Organization?          @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  catalogAssignments    CatalogAssignment[]
+  customerOfferingLinks CustomerOfferingLink[]
+  activities            Activity[]
+  notes                 Note[]
+  conversations         Conversation[]
+  lifecycleItems        LifecycleItem[]
+  tasks                 Task[]
+  bookings              Booking[]
+  intakeSubmissions     IntakeSubmission[]
+  quotes                Quote[]
+  invoices              Invoice[]
+  files                 FileAsset[]
+  portalAccesses        PortalAccess[]
+  recurringAgreements   RecurringAgreement[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, organizationId])
+  @@index([tenantId, ownerUserId])
+}
+
+model Offering {
+  id                  String                 @id
+  tenantId            String
+  type                OfferingType
+  code                String
+  slug                String
+  name                String
+  shortLabel          String?
+  summary             String
+  description         String
+  family              String
+  category            String
+  subcategory         String?
+  tags                Json
+  status              OfferingStatus         @default(ACTIVE)
+  heroMediaPath       String?
+  iconName            String?
+  unitLabel           String?
+  isPhysical          Boolean                @default(false)
+  isDigital           Boolean                @default(false)
+  isService           Boolean                @default(false)
+  taxCategory         String?
+  archivedAt          DateTime?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  tenant              Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  media               OfferingMedia[]
+  variants            OfferingVariant[]
+  prices              OfferingPrice[]
+  catalogItems        CatalogItem[]
+  bundleItems         OfferingBundleItem[]   @relation("BundleOfferingItems")
+  bundledInItems      OfferingBundleItem[]   @relation("BundledOfferingItems")
+  routeBindings       OfferingRouteBinding[]
+  customerLinks       CustomerOfferingLink[]
+  bookingTypes        BookingType[]
+  bookings            Booking[]
+  lifecycleItems      LifecycleItem[]
+  quoteLineItems      QuoteLineItem[]
+  invoiceLineItems    InvoiceLineItem[]
+  recurringAgreements RecurringAgreement[]
+
+  @@unique([tenantId, code])
+  @@unique([tenantId, slug])
+  @@index([tenantId, type, status])
+  @@index([tenantId, family, category])
+}
+
+model OfferingMedia {
+  id         String            @id
+  tenantId   String
+  offeringId String
+  kind       OfferingMediaKind
+  path       String
+  altText    String?
+  sortOrder  Int               @default(0)
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime          @updatedAt
+  tenant     Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  offering   Offering          @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, offeringId, sortOrder])
+}
+
+model OfferingVariant {
+  id                     String                 @id
+  tenantId               String
+  offeringId             String
+  code                   String
+  name                   String
+  displayLabel           String
+  optionValues           Json
+  sortOrder              Int                    @default(0)
+  mediaPath              String?
+  serviceDurationMinutes Int?
+  fulfillmentMetadata    Json?
+  inventoryPolicy        Json?
+  isDefault              Boolean                @default(false)
+  active                 Boolean                @default(true)
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+  tenant                 Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  offering               Offering               @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  prices                 OfferingPrice[]
+  catalogItems           CatalogItem[]
+  routeBindings          OfferingRouteBinding[]
+  customerLinks          CustomerOfferingLink[]
+  bundleItems            OfferingBundleItem[]
+  bookingTypes           BookingType[]
+  lifecycleItems         LifecycleItem[]
+  bookings               Booking[]
+  quoteLineItems         QuoteLineItem[]
+  invoiceLineItems       InvoiceLineItem[]
+  recurringAgreements    RecurringAgreement[]
+
+  @@unique([offeringId, code])
+  @@index([tenantId, offeringId, active])
+}
+
+model OfferingPrice {
+  id                  String                    @id
+  tenantId            String
+  offeringId          String
+  variantId           String?
+  name                String
+  currency            String
+  amountCents         Int
+  compareAtCents      Int?
+  billingModel        OfferingPriceBillingModel
+  interval            BillingCadence?
+  intervalCount       Int?
+  quantityMinimum     Int?
+  quantityMaximum     Int?
+  effectiveFrom       DateTime?
+  effectiveTo         DateTime?
+  isDefault           Boolean                   @default(false)
+  active              Boolean                   @default(true)
+  version             Int                       @default(1)
+  metadata            Json?
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  tenant              Tenant                    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  offering            Offering                  @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  variant             OfferingVariant?          @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  catalogItems        CatalogItem[]             @relation("CatalogItemPrice")
+  bundleItems         OfferingBundleItem[]      @relation("BundleItemPrice")
+  customerLinks       CustomerOfferingLink[]
+  quoteLineItems      QuoteLineItem[]
+  invoiceLineItems    InvoiceLineItem[]
+  recurringAgreements RecurringAgreement[]
+
+  @@index([tenantId, offeringId, active])
+  @@index([tenantId, billingModel, active])
+}
+
+model Catalog {
+  id            String                 @id
+  tenantId      String
+  name          String
+  code          String
+  description   String
+  type          CatalogType
+  active        Boolean                @default(true)
+  isDefault     Boolean                @default(false)
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  tenant        Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items         CatalogItem[]
+  assignments   CatalogAssignment[]
+  routeBindings OfferingRouteBinding[]
+  customerLinks CustomerOfferingLink[]
+
+  @@unique([tenantId, code])
+  @@index([tenantId, type, active])
+}
+
+model CatalogItem {
+  id          String           @id
+  tenantId    String
+  catalogId   String
+  offeringId  String
+  variantId   String?
+  priceId     String?
+  featured    Boolean          @default(false)
+  requestable Boolean          @default(true)
+  active      Boolean          @default(true)
+  sortOrder   Int              @default(0)
+  metadata    Json?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  tenant      Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  catalog     Catalog          @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+  offering    Offering         @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  variant     OfferingVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  price       OfferingPrice?   @relation("CatalogItemPrice", fields: [priceId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, catalogId, sortOrder])
+  @@index([tenantId, offeringId])
+}
+
+model CatalogAssignment {
+  id                String        @id
+  tenantId          String
+  catalogId         String
+  organizationId    String?
+  contactId         String?
+  segment           String?
+  portalVisible     Boolean       @default(true)
+  negotiatedPricing Json?
+  active            Boolean       @default(true)
+  effectiveFrom     DateTime?
+  effectiveTo       DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  tenant            Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  catalog           Catalog       @relation(fields: [catalogId], references: [id], onDelete: Cascade)
+  organization      Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  contact           Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, catalogId, active])
+  @@index([tenantId, organizationId])
+  @@index([tenantId, contactId])
+  @@index([tenantId, segment])
+}
+
+model OfferingBundleItem {
+  id               String                @id
+  tenantId         String
+  bundleOfferingId String
+  itemOfferingId   String
+  itemVariantId    String?
+  itemPriceId      String?
+  requirement      BundleItemRequirement @default(INCLUDED)
+  quantity         Int                   @default(1)
+  sortOrder        Int                   @default(0)
+  metadata         Json?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  tenant           Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bundleOffering   Offering              @relation("BundleOfferingItems", fields: [bundleOfferingId], references: [id], onDelete: Cascade)
+  itemOffering     Offering              @relation("BundledOfferingItems", fields: [itemOfferingId], references: [id], onDelete: Cascade)
+  itemVariant      OfferingVariant?      @relation(fields: [itemVariantId], references: [id], onDelete: SetNull)
+  itemPrice        OfferingPrice?        @relation("BundleItemPrice", fields: [itemPriceId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, bundleOfferingId, sortOrder])
+}
+
+model OfferingRouteBinding {
+  id                 String            @id
+  tenantId           String
+  offeringId         String?
+  variantId          String?
+  catalogId          String?
+  pipelineTemplateId String?
+  bookingTypeId      String?
+  intakeFormId       String?
+  automationRuleId   String?
+  ownerUserId        String?
+  quoteDefaults      Json?
+  invoiceDefaults    Json?
+  portalVisible      Boolean           @default(true)
+  requestable        Boolean           @default(true)
+  tags               Json
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  tenant             Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  offering           Offering?         @relation(fields: [offeringId], references: [id], onDelete: SetNull)
+  variant            OfferingVariant?  @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  catalog            Catalog?          @relation(fields: [catalogId], references: [id], onDelete: SetNull)
+  pipelineTemplate   PipelineTemplate? @relation(fields: [pipelineTemplateId], references: [id], onDelete: SetNull)
+  bookingType        BookingType?      @relation(fields: [bookingTypeId], references: [id], onDelete: SetNull)
+  intakeForm         IntakeForm?       @relation(fields: [intakeFormId], references: [id], onDelete: SetNull)
+  automationRule     AutomationRule?   @relation(fields: [automationRuleId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, offeringId])
+  @@index([tenantId, variantId])
+  @@index([tenantId, catalogId])
+}
+
+model CustomerOfferingLink {
+  id                  String                     @id
+  tenantId            String
+  organizationId      String?
+  contactId           String?
+  catalogId           String?
+  offeringId          String
+  variantId           String?
+  priceId             String?
+  sourceType          CustomerOfferingSourceType
+  sourceId            String?
+  status              CustomerOfferingStatus
+  firstSeenAt         DateTime                   @default(now())
+  activatedAt         DateTime?
+  endedAt             DateTime?
+  lastActivityAt      DateTime?
+  notes               String?
+  metadata            Json?
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
+  tenant              Tenant                     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  organization        Organization?              @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  contact             Contact?                   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  catalog             Catalog?                   @relation(fields: [catalogId], references: [id], onDelete: SetNull)
+  offering            Offering                   @relation(fields: [offeringId], references: [id], onDelete: Cascade)
+  variant             OfferingVariant?           @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  price               OfferingPrice?             @relation(fields: [priceId], references: [id], onDelete: SetNull)
+  lifecycleItems      LifecycleItem[]
+  bookings            Booking[]
+  quoteLineItems      QuoteLineItem[]
+  invoiceLineItems    InvoiceLineItem[]
+  recurringAgreements RecurringAgreement[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, organizationId])
+  @@index([tenantId, contactId])
+  @@index([tenantId, offeringId])
+}
+
+model Activity {
+  id              String         @id
+  tenantId        String
+  contactId       String?
+  organizationId  String?
+  conversationId  String?
+  lifecycleItemId String?
+  taskId          String?
+  bookingId       String?
+  quoteId         String?
+  invoiceId       String?
+  kind            ActivityKind
+  title           String
+  detail          String
+  actorLabel      String
+  metadata        Json
+  occurredAt      DateTime       @default(now())
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact         Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization    Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  conversation    Conversation?  @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  lifecycleItem   LifecycleItem? @relation(fields: [lifecycleItemId], references: [id], onDelete: SetNull)
+  task            Task?          @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  booking         Booking?       @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  quote           Quote?         @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  invoice         Invoice?       @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, occurredAt])
+}
+
+model Note {
+  id              String         @id
+  tenantId        String
+  contactId       String?
+  organizationId  String?
+  conversationId  String?
+  lifecycleItemId String?
+  authorUserId    String
+  body            String
+  pinned          Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact         Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization    Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  conversation    Conversation?  @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  lifecycleItem   LifecycleItem? @relation(fields: [lifecycleItemId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+}
+
+model Conversation {
+  id             String               @id
+  tenantId       String
+  contactId      String?
+  organizationId String?
+  subject        String
+  channel        ConversationChannel
+  status         ConversationStatus
+  priority       ConversationPriority
+  assignedUserId String?
+  unreadCount    Int                  @default(0)
+  portalVisible  Boolean              @default(true)
+  summary        String
+  tags           Json
+  lastMessageAt  DateTime
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  tenant         Tenant               @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact        Contact?             @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization   Organization?        @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  messages       Message[]
+  notes          Note[]
+  activities     Activity[]
+  attachments    Attachment[]
+  tasks          Task[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, lastMessageAt])
+}
+
+model Message {
+  id             String            @id
+  tenantId       String
+  conversationId String
+  authorType     MessageAuthorType
+  authorLabel    String
+  body           String
+  isInternalNote Boolean           @default(false)
+  intent         String?
+  riskLabel      String?
+  extractedTags  Json
+  sentAt         DateTime          @default(now())
+  tenant         Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation   Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  attachments    Attachment[]
+
+  @@index([tenantId, sentAt])
+}
+
+model Attachment {
+  id             String        @id
+  tenantId       String
+  conversationId String?
+  messageId      String?
+  fileAssetId    String
+  createdAt      DateTime      @default(now())
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation   Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  message        Message?      @relation(fields: [messageId], references: [id], onDelete: SetNull)
+  fileAsset      FileAsset     @relation(fields: [fileAssetId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+}
+
+model CannedReply {
+  id        String   @id
+  tenantId  String
+  title     String
+  category  String
+  body      String
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, category])
+}
+
+model PipelineTemplate {
+  id            String                 @id
+  tenantId      String
+  name          String
+  category      String
+  description   String
+  isDefault     Boolean                @default(false)
+  createdAt     DateTime               @default(now())
+  tenant        Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  stages        PipelineStage[]
+  items         LifecycleItem[]
+  routeBindings OfferingRouteBinding[]
+
+  @@index([tenantId, category])
+}
+
+model PipelineStage {
+  id         String             @id
+  tenantId   String
+  templateId String
+  name       String
+  order      Int
+  color      String
+  kind       LifecycleStageKind @default(ACTIVE)
+  createdAt  DateTime           @default(now())
+  tenant     Tenant             @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  template   PipelineTemplate   @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  items      LifecycleItem[]
+
+  @@unique([templateId, order])
+  @@index([tenantId, templateId])
+}
+
+model LifecycleItem {
+  id                     String                @id
+  tenantId               String
+  templateId             String
+  stageId                String
+  contactId              String?
+  organizationId         String?
+  customerOfferingLinkId String?
+  offeringId             String?
+  offeringVariantId      String?
+  ownerUserId            String
+  title                  String
+  description            String
+  dueDate                DateTime?
+  valueCents             Int                   @default(0)
+  status                 LifecycleItemStatus   @default(ACTIVE)
+  priority               TaskPriority          @default(MEDIUM)
+  riskFlag               Boolean               @default(false)
+  tags                   Json
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  tenant                 Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  template               PipelineTemplate      @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  stage                  PipelineStage         @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  contact                Contact?              @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization           Organization?         @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  customerOfferingLink   CustomerOfferingLink? @relation(fields: [customerOfferingLinkId], references: [id], onDelete: SetNull)
+  offering               Offering?             @relation(fields: [offeringId], references: [id], onDelete: SetNull)
+  offeringVariant        OfferingVariant?      @relation(fields: [offeringVariantId], references: [id], onDelete: SetNull)
+  activities             Activity[]
+  notes                  Note[]
+  tasks                  Task[]
+
+  @@index([tenantId, stageId])
+  @@index([tenantId, ownerUserId])
+  @@index([tenantId, offeringId])
+}
+
+model Task {
+  id              String         @id
+  tenantId        String
+  contactId       String?
+  organizationId  String?
+  conversationId  String?
+  lifecycleItemId String?
+  bookingId       String?
+  quoteId         String?
+  invoiceId       String?
+  ownerUserId     String
+  title           String
+  description     String
+  dueDate         DateTime?
+  status          TaskStatus
+  priority        TaskPriority
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  tenant          Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact         Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization    Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  conversation    Conversation?  @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  lifecycleItem   LifecycleItem? @relation(fields: [lifecycleItemId], references: [id], onDelete: SetNull)
+  booking         Booking?       @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  quote           Quote?         @relation(fields: [quoteId], references: [id], onDelete: SetNull)
+  invoice         Invoice?       @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  activities      Activity[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, dueDate])
+}
+
+model AutomationRule {
+  id            String                 @id
+  tenantId      String
+  name          String
+  enabled       Boolean                @default(true)
+  triggerType   AutomationTriggerType
+  conditions    Json
+  actions       Json
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  lastRunAt     DateTime?
+  tenant        Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  runs          AutomationRun[]
+  routeBindings OfferingRouteBinding[]
+
+  @@index([tenantId, triggerType])
+}
+
+model AutomationRun {
+  id          String                @id
+  tenantId    String
+  ruleId      String?
+  triggerType AutomationTriggerType
+  sourceType  String
+  sourceId    String
+  status      AutomationRunStatus
+  summary     String
+  details     Json
+  createdAt   DateTime              @default(now())
+  tenant      Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  rule        AutomationRule?       @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+}
+
+model IntakeForm {
+  id            String                 @id
+  tenantId      String
+  name          String
+  questions     Json
+  createdAt     DateTime               @default(now())
+  tenant        Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bookingTypes  BookingType[]
+  submissions   IntakeSubmission[]
+  routeBindings OfferingRouteBinding[]
+}
+
+model BookingType {
+  id                String                 @id
+  tenantId          String
+  intakeFormId      String?
+  offeringId        String?
+  offeringVariantId String?
+  slug              String
+  name              String
+  description       String
+  durationMinutes   Int
+  bufferMinutes     Int
+  availabilityJson  Json
+  createdAt         DateTime               @default(now())
+  tenant            Tenant                 @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  intakeForm        IntakeForm?            @relation(fields: [intakeFormId], references: [id], onDelete: SetNull)
+  offering          Offering?              @relation(fields: [offeringId], references: [id], onDelete: SetNull)
+  offeringVariant   OfferingVariant?       @relation(fields: [offeringVariantId], references: [id], onDelete: SetNull)
+  bookings          Booking[]
+  routeBindings     OfferingRouteBinding[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId, offeringId])
+}
+
+model Booking {
+  id                     String                @id
+  tenantId               String
+  bookingTypeId          String
+  contactId              String?
+  organizationId         String?
+  customerOfferingLinkId String?
+  offeringId             String?
+  offeringVariantId      String?
+  status                 BookingStatus
+  startsAt               DateTime
+  endsAt                 DateTime
+  notes                  String
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+  tenant                 Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  bookingType            BookingType           @relation(fields: [bookingTypeId], references: [id], onDelete: Cascade)
+  contact                Contact?              @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization           Organization?         @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  customerOfferingLink   CustomerOfferingLink? @relation(fields: [customerOfferingLinkId], references: [id], onDelete: SetNull)
+  offering               Offering?             @relation(fields: [offeringId], references: [id], onDelete: SetNull)
+  offeringVariant        OfferingVariant?      @relation(fields: [offeringVariantId], references: [id], onDelete: SetNull)
+  intakeSubmission       IntakeSubmission?
+  activities             Activity[]
+  tasks                  Task[]
+
+  @@index([tenantId, startsAt])
+  @@index([tenantId, offeringId])
+}
+
+model IntakeSubmission {
+  id           String     @id
+  tenantId     String
+  intakeFormId String
+  bookingId    String?    @unique
+  contactId    String?
+  answers      Json
+  createdAt    DateTime   @default(now())
+  tenant       Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  intakeForm   IntakeForm @relation(fields: [intakeFormId], references: [id], onDelete: Cascade)
+  booking      Booking?   @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  contact      Contact?   @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+}
+
+model Quote {
+  id             String          @id
+  tenantId       String
+  contactId      String?
+  organizationId String?
+  reference      String
+  status         QuoteStatus
+  issueDate      DateTime
+  expiresAt      DateTime
+  subtotalCents  Int
+  taxCents       Int
+  discountCents  Int
+  totalCents     Int
+  notes          String
+  portalVisible  Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact        Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization   Organization?   @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  lineItems      QuoteLineItem[]
+  activities     Activity[]
+  tasks          Task[]
+
+  @@unique([tenantId, reference])
+  @@index([tenantId, status])
+}
+
+model QuoteLineItem {
+  id                     String                @id
+  quoteId                String
+  offeringId             String?
+  offeringVariantId      String?
+  offeringPriceId        String?
+  customerOfferingLinkId String?
+  description            String
+  quantity               Int
+  unitPriceCents         Int
+  isAdHoc                Boolean               @default(false)
+  adHocReason            String?
+  sortOrder              Int
+  quote                  Quote                 @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  offering               Offering?             @relation(fields: [offeringId], references: [id], onDelete: SetNull)
+  offeringVariant        OfferingVariant?      @relation(fields: [offeringVariantId], references: [id], onDelete: SetNull)
+  offeringPrice          OfferingPrice?        @relation(fields: [offeringPriceId], references: [id], onDelete: SetNull)
+  customerOfferingLink   CustomerOfferingLink? @relation(fields: [customerOfferingLinkId], references: [id], onDelete: SetNull)
+
+  @@index([quoteId, sortOrder])
+  @@index([offeringPriceId])
+}
+
+model Invoice {
+  id             String            @id
+  tenantId       String
+  contactId      String?
+  organizationId String?
+  reference      String
+  status         InvoiceStatus
+  issueDate      DateTime
+  dueDate        DateTime
+  subtotalCents  Int
+  taxCents       Int
+  discountCents  Int
+  totalCents     Int
+  balanceCents   Int
+  notes          String
+  portalVisible  Boolean           @default(true)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  tenant         Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact        Contact?          @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization   Organization?     @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  lineItems      InvoiceLineItem[]
+  activities     Activity[]
+  tasks          Task[]
+
+  @@unique([tenantId, reference])
+  @@index([tenantId, status])
+}
+
+model InvoiceLineItem {
+  id                     String                @id
+  invoiceId              String
+  offeringId             String?
+  offeringVariantId      String?
+  offeringPriceId        String?
+  customerOfferingLinkId String?
+  description            String
+  quantity               Int
+  unitPriceCents         Int
+  isAdHoc                Boolean               @default(false)
+  adHocReason            String?
+  sortOrder              Int
+  invoice                Invoice               @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  offering               Offering?             @relation(fields: [offeringId], references: [id], onDelete: SetNull)
+  offeringVariant        OfferingVariant?      @relation(fields: [offeringVariantId], references: [id], onDelete: SetNull)
+  offeringPrice          OfferingPrice?        @relation(fields: [offeringPriceId], references: [id], onDelete: SetNull)
+  customerOfferingLink   CustomerOfferingLink? @relation(fields: [customerOfferingLinkId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId, sortOrder])
+  @@index([offeringPriceId])
+}
+
+model RecurringAgreement {
+  id                     String                   @id
+  tenantId               String
+  contactId              String?
+  organizationId         String?
+  customerOfferingLinkId String?
+  offeringId             String?
+  offeringVariantId      String?
+  offeringPriceId        String?
+  name                   String
+  amountCents            Int
+  cadence                BillingCadence
+  status                 RecurringAgreementStatus
+  nextBillingDate        DateTime
+  createdAt              DateTime                 @default(now())
+  tenant                 Tenant                   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact                Contact?                 @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization           Organization?            @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  customerOfferingLink   CustomerOfferingLink?    @relation(fields: [customerOfferingLinkId], references: [id], onDelete: SetNull)
+  offering               Offering?                @relation(fields: [offeringId], references: [id], onDelete: SetNull)
+  offeringVariant        OfferingVariant?         @relation(fields: [offeringVariantId], references: [id], onDelete: SetNull)
+  offeringPrice          OfferingPrice?           @relation(fields: [offeringPriceId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, status])
+  @@index([tenantId, offeringPriceId])
+}
+
+model FileAsset {
+  id               String        @id
+  tenantId         String
+  contactId        String?
+  organizationId   String?
+  uploadedByUserId String?
+  name             String
+  path             String
+  mimeType         String
+  sizeBytes        Int
+  createdAt        DateTime      @default(now())
+  tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact          Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization     Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  attachments      Attachment[]
+
+  @@index([tenantId, createdAt])
+}
+
+model Notification {
+  id        String           @id
+  tenantId  String
+  userId    String?
+  kind      NotificationKind
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+  tenant    Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, createdAt])
+}
+
+model PortalAccess {
+  id             String        @id
+  tenantId       String
+  contactId      String?
+  organizationId String?
+  accessKey      String        @unique
+  label          String
+  active         Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  contact        Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, active])
+}

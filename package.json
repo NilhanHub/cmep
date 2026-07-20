@@ -1,0 +1,77 @@
+{
+  "name": "cmep",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.15.0 <23",
+    "npm": ">=10.0.0"
+  },
+  "scripts": {
+    "postinstall": "prisma generate",
+    "bootstrap": "npm run db:setup",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --ignore-pattern coverage --ignore-pattern playwright-report --ignore-pattern test-results",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --coverage",
+    "test:e2e": "npm run build && playwright test",
+    "db:generate": "prisma generate",
+    "db:setup": "npm run db:generate && tsx scripts/db/setup.ts",
+    "db:migrate": "npm run db:generate && tsx scripts/db/migrate.ts",
+    "db:seed": "prisma db seed",
+    "demo:reset": "tsx scripts/db/reset.ts",
+    "evidence:smoke": "tsx scripts/evidence/smoke.ts",
+    "evidence:isolation": "tsx scripts/evidence/isolation.ts",
+    "evidence:catalog": "tsx scripts/evidence/catalog.ts",
+    "evidence:full": "tsx scripts/evidence/full.ts",
+    "oracle:bundle": "tsx scripts/oracle/bundle.ts",
+    "oracle:latest": "tsx scripts/oracle/latest.ts",
+    "verify:accountable": "tsx scripts/evidence/verify-accountable.ts",
+    "san:preflight": "tsx scripts/san/preflight.ts",
+    "san:lock": "tsx scripts/san/sanlock.ts",
+    "san:graph:validate": "tsx scripts/san/validate-graph.ts"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
+    "@prisma/client": "6.19.3",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "date-fns": "^4.1.0",
+    "dotenv": "^17.4.2",
+    "lucide-react": "^0.554.0",
+    "next": "16.2.10",
+    "next-themes": "^0.4.6",
+    "prisma": "6.19.3",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "react-hook-form": "^7.66.0",
+    "server-only": "^0.0.1",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.1",
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "3.2.7",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "jsdom": "^27.0.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.1",
+    "typescript": "^5",
+    "vitest": "3.2.7"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.19"
+    }
+  }
+}

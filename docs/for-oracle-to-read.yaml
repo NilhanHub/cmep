@@ -1,0 +1,113 @@
+objective: Determine whether CMEP v1 is genuinely working end-to-end locally on this machine as an offering-first CME platform, with first-class offerings, variants, prices, catalogs, catalog assignments, and customer-offering links driving the seven core surfaces while tenant isolation and portal scoping remain intact.
+current_failure_or_uncertainty:
+  - Prior accountable runs proved a workflow-centric local app, not the intended offering-first concept.
+  - The repo has now been retrofitted and rerun, but Oracle must independently confirm the new claim from emitted evidence.
+  - Oracle should still check for aggregate-only fallback paths, silent off-catalog defaults, cross-tenant catalog leakage, cross-client portal leakage, and runtime or hydration defects that only show up under accountable reruns.
+canonical_claim_under_test:
+  id: claim.offeringSpine
+  claim: CMEP has a first-class offering/catalog spine and the core business flows route through it end-to-end.
+exact_reproduction:
+  - npm install
+  - copy .env.example .env
+  - npm run db:setup
+  - npm run evidence:catalog
+  - npm run verify:accountable
+  - inspect artifacts/runs/20260413-154218Z-catalog-catalog-a39b4696
+  - inspect artifacts/runs/20260413-154338Z-full-full-80b1451c
+  - inspect artifacts/runs/20260413-153948Z-verify-verify-a066a5be
+  - inspect san/state/proof-matrix.md
+  - inspect san/verification/latest.md
+  - npm run oracle:bundle
+expected_behavior:
+  - app boots locally from documented commands
+  - first-class offering, variant, price, catalog, route-binding, and customer-offering entities exist
+  - seven surfaces complete their accountable flow through the offering/catalog spine where appropriate
+  - customer detail explicitly shows offering relationship states
+  - quotes and invoices derive line items from offering prices by default
+  - service bookings originate from service offerings or service variants
+  - portal catalog visibility and requestability are constrained by catalog assignment
+  - automation and search can target offering semantics
+  - tenant isolation and portal scoping probes are denied
+  - DB reset remains structurally deterministic on repeat reset
+  - no unexpected runtime blockers or hidden hydration defects occur in the accountable run
+actual_behavior_sources:
+  proof_matrix: san/state/proof-matrix.json
+  verification_summary: san/verification/latest.md
+  latest_run_pointer: artifacts/runs/latest.json
+  latest_catalog_run: artifacts/runs/20260413-154218Z-catalog-catalog-a39b4696
+  latest_full_run: artifacts/runs/20260413-154338Z-full-full-80b1451c
+  latest_verify_run: artifacts/runs/20260413-153948Z-verify-verify-a066a5be
+relevant_paths:
+  - README.md
+  - AGENTS.md
+  - san/control-plane.md
+  - san/state/proof-matrix.md
+  - san/state/proof-matrix.json
+  - san/verification/latest.md
+  - san/topology/graph.json
+  - san/contracts/rehydration-truth-contract.md
+  - prisma/schema.prisma
+  - prisma/seed.ts
+  - prisma/seed-offering-spine.ts
+  - src/modules/catalog
+  - src/modules/customer-graph
+  - src/modules/lifecycle
+  - src/modules/scheduling
+  - src/modules/revenue
+  - src/modules/portal
+  - src/modules/automation
+  - src/modules/shell
+  - src/shared/observability
+  - src/tests/e2e/cmep-accountable.spec.ts
+  - scripts/evidence
+  - scripts/oracle
+required_artifacts:
+  - artifacts/runs/20260413-154218Z-catalog-catalog-a39b4696/**
+  - artifacts/runs/20260413-154338Z-full-full-80b1451c/**
+  - artifacts/runs/20260413-153948Z-verify-verify-a066a5be/**
+  - summary.md
+  - app.log.jsonl
+  - events.jsonl
+  - trace.ndjson
+  - metrics.json
+  - state-before.json
+  - state-after.json
+  - scenario-results.json
+  - exception.json
+  - network.har
+  - playwright-trace.zip
+  - screenshots
+  - dom
+  - ui-states
+  - proof-matrix snapshot
+  - Oracle bundle manifest
+oracle_bundle_recipe:
+  bundle_root_pointer: artifacts/oracle/latest.json
+  must_verify:
+    - first-class offering/service/catalog entities exist
+    - customer-to-offering mapping is real
+    - quotes, invoices, bookings, lifecycle, portal, automation, and search route through offering semantics
+    - manual off-catalog exceptions are explicit and auditable
+    - tenant isolation holds for catalog-linked flows
+    - portal catalog restriction holds for client users
+sanitization_rules:
+  - never include raw env files
+  - never include raw cookies or unsanitized portal keys
+  - prefer pseudonymous identifiers in exported state
+  - do not include raw sqlite files unless explicitly justified
+acceptance_evidence_required:
+  - claim-by-claim verdicts
+  - exact evidence files used
+  - exact root causes if any
+  - minimum patch plan
+  - explicit blind spots caused by missing evidence only
+  - explicit verdict on whether CMEP is now offering-first
+known_suspects:
+  - revenue line-item derivation may still hide aggregate/manual defaults outside the accountable path
+  - booking source truth may still regress if route bindings drift from booking types
+  - lifecycle items may still fall back to generic work if future changes bypass offering linkage
+  - portal visibility may still need close inspection around catalog assignment edges
+recent_instrumentation_changes:
+  - dedicated evidence:catalog run support
+  - expanded state snapshots for catalog and customer-offering counts
+  - accountable Playwright flow extended to prove offering creation, pricing, assignment, lifecycle, revenue, and portal restriction

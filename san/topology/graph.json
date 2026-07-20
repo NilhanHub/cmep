@@ -1,0 +1,973 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "sanBlueprintEdition": "3.7",
+  "graphKind": "hybrid",
+  "authoritative": true,
+  "nodeBudgetPolicy": {
+    "targetMaxNodeLoadPercent": 5,
+    "reviewTriggerPercent": 5,
+    "mandatoryDispersionReviewPercent": 10,
+    "allowExceptionalNodes": true,
+    "notes": "Effective load is weighted structural burden, not raw LOC alone."
+  },
+  "factors": [
+    "codeSurfaceShare",
+    "dependencyCentrality",
+    "fanInFanOutPressure",
+    "affectedRadius",
+    "changeFrequency",
+    "runtimeCriticality",
+    "verificationSpan",
+    "hiddenStateRisk"
+  ],
+  "agentOrientation": {
+    "canonicalDoctrineSurface": "AGENTS.md",
+    "canonicalControlPlaneSurface": "san/control-plane.md",
+    "canonicalDurableStateSurface": "san/state/durable-state.md",
+    "canonicalPreflightSurface": "san/preflight.md",
+    "canonicalSanlockSurface": "san/sanlock.md",
+    "defaultColdStartSequence": [
+      "Read AGENTS.md",
+      "Read san/control-plane.md",
+      "Read san/state/durable-state.md",
+      "Read san/preflight.md",
+      "Read san/topology/graph.json",
+      "Read san/sanlock.md"
+    ],
+    "defaultExecutionEntrypoints": [
+      "npm run dev",
+      "npm run db:setup"
+    ],
+    "defaultVerificationEntrypoints": [
+      "npm run lint",
+      "npm run typecheck",
+      "npm run test",
+      "npm run test:e2e",
+      "npm run san:preflight",
+      "npm run san:lock",
+      "npm run san:graph:validate",
+      "npm run evidence:catalog",
+      "npm run evidence:full",
+      "npm run verify:accountable"
+    ],
+    "notes": "CMEP v1 is a local-first multi-tenant product shell with tenant-scoped repositories, accountable observability, and Oracle-ready evidence packaging."
+  },
+  "nodes": [
+    {
+      "id": "node.shell",
+      "label": "Shell and mission control",
+      "role": "platform",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.identityTenant",
+        "node.sharedUi",
+        "node.sharedDomain"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "layout",
+        "navigation",
+        "global search",
+        "command palette"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": false
+      },
+      "effectiveLoad": {
+        "percent": 4.1,
+        "factorScores": {
+          "codeSurfaceShare": 3,
+          "dependencyCentrality": 5,
+          "fanInFanOutPressure": 4,
+          "affectedRadius": 4,
+          "changeFrequency": 4,
+          "runtimeCriticality": 4,
+          "verificationSpan": 4,
+          "hiddenStateRisk": 2
+        }
+      },
+      "dispersionReadiness": {
+        "score": 74,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/app/app",
+        "src/modules/shell"
+      ],
+      "executionEntrypoints": [
+        "npm run dev"
+      ],
+      "verificationEntrypoints": [
+        "npm run test:e2e"
+      ],
+      "notes": "Owns app shell, mission control composition, palette, and navigation."
+    },
+    {
+      "id": "node.identityTenant",
+      "label": "Identity and tenant control",
+      "role": "platform",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.sharedDomain"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "tenant switching",
+        "role switching",
+        "tenant isolation"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": true
+      },
+      "effectiveLoad": {
+        "percent": 4.8,
+        "factorScores": {
+          "codeSurfaceShare": 3,
+          "dependencyCentrality": 5,
+          "fanInFanOutPressure": 5,
+          "affectedRadius": 5,
+          "changeFrequency": 3,
+          "runtimeCriticality": 5,
+          "verificationSpan": 5,
+          "hiddenStateRisk": 4
+        }
+      },
+      "dispersionReadiness": {
+        "score": 71,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/modules/identity-tenant",
+        "src/app/api/identity"
+      ],
+      "executionEntrypoints": [
+        "src/app/app/layout.tsx"
+      ],
+      "verificationEntrypoints": [
+        "npm run test"
+      ],
+      "notes": "Authority boundary for user context, tenant scoping, and portal access."
+    },
+    {
+      "id": "node.catalog",
+      "label": "Catalog and offering spine",
+      "role": "feature",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.identityTenant",
+        "node.sharedDomain",
+        "node.sharedUi"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "catalog home",
+        "offering detail",
+        "variant creation",
+        "price versioning",
+        "catalog assignment"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": true
+      },
+      "effectiveLoad": {
+        "percent": 4.8,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 5,
+          "fanInFanOutPressure": 4,
+          "affectedRadius": 5,
+          "changeFrequency": 4,
+          "runtimeCriticality": 5,
+          "verificationSpan": 5,
+          "hiddenStateRisk": 4
+        }
+      },
+      "dispersionReadiness": {
+        "score": 74,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/modules/catalog",
+        "src/app/app/catalog"
+      ],
+      "executionEntrypoints": [
+        "/app/catalog"
+      ],
+      "verificationEntrypoints": [
+        "npm run test",
+        "npm run evidence:catalog"
+      ],
+      "notes": "Owns the offering-first catalog spine: offerings, variants, prices, bundle composition, catalog visibility, and route bindings."
+    },
+    {
+      "id": "node.customerGraph",
+      "label": "Unified customer graph",
+      "role": "feature",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.identityTenant",
+        "node.sharedDomain",
+        "node.sharedUi"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "list",
+        "detail",
+        "create",
+        "archive"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": false
+      },
+      "effectiveLoad": {
+        "percent": 4.5,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 4,
+          "fanInFanOutPressure": 4,
+          "affectedRadius": 4,
+          "changeFrequency": 4,
+          "runtimeCriticality": 4,
+          "verificationSpan": 4,
+          "hiddenStateRisk": 3
+        }
+      },
+      "dispersionReadiness": {
+        "score": 75,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/modules/customer-graph",
+        "src/app/app/customers"
+      ],
+      "executionEntrypoints": [
+        "/app/customers"
+      ],
+      "verificationEntrypoints": [
+        "npm run test"
+      ],
+      "notes": "People and organizations with narrative detail, explicit customer-offering shelves, and tenant-scoped timelines."
+    },
+    {
+      "id": "node.inbox",
+      "label": "Omnichannel inbox",
+      "role": "feature",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.customerGraph",
+        "node.identityTenant",
+        "node.aiAssist",
+        "node.sharedUi"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "conversation list",
+        "message send",
+        "canned reply",
+        "attachment upload"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": false
+      },
+      "effectiveLoad": {
+        "percent": 4.6,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 4,
+          "fanInFanOutPressure": 4,
+          "affectedRadius": 4,
+          "changeFrequency": 4,
+          "runtimeCriticality": 4,
+          "verificationSpan": 4,
+          "hiddenStateRisk": 4
+        }
+      },
+      "dispersionReadiness": {
+        "score": 73,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/modules/inbox",
+        "src/app/app/inbox"
+      ],
+      "executionEntrypoints": [
+        "/app/inbox"
+      ],
+      "verificationEntrypoints": [
+        "npm run test:e2e"
+      ],
+      "notes": "Local-first shared inbox with AI hook surfaces."
+    },
+    {
+      "id": "node.lifecycle",
+      "label": "Lifecycle canvas",
+      "role": "feature",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.customerGraph",
+        "node.identityTenant",
+        "node.automation",
+        "node.sharedUi"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "board",
+        "drag and drop",
+        "detail drawer"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": false
+      },
+      "effectiveLoad": {
+        "percent": 4.7,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 4,
+          "fanInFanOutPressure": 4,
+          "affectedRadius": 4,
+          "changeFrequency": 4,
+          "runtimeCriticality": 4,
+          "verificationSpan": 5,
+          "hiddenStateRisk": 4
+        }
+      },
+      "dispersionReadiness": {
+        "score": 72,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/modules/lifecycle",
+        "src/app/app/lifecycle"
+      ],
+      "executionEntrypoints": [
+        "/app/lifecycle"
+      ],
+      "verificationEntrypoints": [
+        "npm run test:e2e"
+      ],
+      "notes": "Primary board workflow surface with move actions, risk signals, and offering-linked card context."
+    },
+    {
+      "id": "node.automation",
+      "label": "Automation studio",
+      "role": "feature",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.lifecycle",
+        "node.scheduling",
+        "node.revenue",
+        "node.sharedDomain"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "rule simulation",
+        "run log",
+        "action application"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": true,
+        "hotspot": true
+      },
+      "effectiveLoad": {
+        "percent": 5,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 5,
+          "fanInFanOutPressure": 5,
+          "affectedRadius": 5,
+          "changeFrequency": 4,
+          "runtimeCriticality": 4,
+          "verificationSpan": 5,
+          "hiddenStateRisk": 4
+        }
+      },
+      "dispersionReadiness": {
+        "score": 69,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": false,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/modules/automation",
+        "src/app/app/automations"
+      ],
+      "executionEntrypoints": [
+        "/app/automations"
+      ],
+      "verificationEntrypoints": [
+        "npm run test"
+      ],
+      "notes": "Rules engine and run log. Flagged as a likely split candidate if rule volume grows."
+    },
+    {
+      "id": "node.scheduling",
+      "label": "Scheduling and intake",
+      "role": "feature",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.customerGraph",
+        "node.identityTenant",
+        "node.automation",
+        "node.sharedUi"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "calendar view",
+        "public booking page",
+        "reschedule",
+        "cancel"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": false
+      },
+      "effectiveLoad": {
+        "percent": 4.4,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 4,
+          "fanInFanOutPressure": 4,
+          "affectedRadius": 4,
+          "changeFrequency": 4,
+          "runtimeCriticality": 4,
+          "verificationSpan": 4,
+          "hiddenStateRisk": 3
+        }
+      },
+      "dispersionReadiness": {
+        "score": 74,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/modules/scheduling",
+        "src/app/app/schedule",
+        "src/app/book"
+      ],
+      "executionEntrypoints": [
+        "/app/schedule",
+        "/book/[tenant]/[bookingType]"
+      ],
+      "verificationEntrypoints": [
+        "npm run test:e2e"
+      ],
+      "notes": "Handles offering-backed booking types, availability, public booking, intake capture, and timeline side effects."
+    },
+    {
+      "id": "node.revenue",
+      "label": "Revenue actions",
+      "role": "feature",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.customerGraph",
+        "node.identityTenant",
+        "node.automation",
+        "node.sharedUi"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "quotes",
+        "invoices",
+        "payments",
+        "portal approval"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": false
+      },
+      "effectiveLoad": {
+        "percent": 4.5,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 4,
+          "fanInFanOutPressure": 4,
+          "affectedRadius": 4,
+          "changeFrequency": 4,
+          "runtimeCriticality": 4,
+          "verificationSpan": 4,
+          "hiddenStateRisk": 3
+        }
+      },
+      "dispersionReadiness": {
+        "score": 74,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/modules/revenue",
+        "src/app/app/revenue"
+      ],
+      "executionEntrypoints": [
+        "/app/revenue/quotes",
+        "/app/revenue/invoices"
+      ],
+      "verificationEntrypoints": [
+        "npm run test:e2e"
+      ],
+      "notes": "Quote and invoice workflows with offering-price derivation, print-ready views, and recurring agreement linkage."
+    },
+    {
+      "id": "node.portal",
+      "label": "Client workspace",
+      "role": "feature",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.identityTenant",
+        "node.inbox",
+        "node.scheduling",
+        "node.revenue",
+        "node.sharedUi"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "scoped portal view",
+        "quote approval",
+        "conversation reply"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": true
+      },
+      "effectiveLoad": {
+        "percent": 4.9,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 5,
+          "fanInFanOutPressure": 5,
+          "affectedRadius": 5,
+          "changeFrequency": 4,
+          "runtimeCriticality": 5,
+          "verificationSpan": 5,
+          "hiddenStateRisk": 5
+        }
+      },
+      "dispersionReadiness": {
+        "score": 70,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/modules/portal",
+        "src/app/client"
+      ],
+      "executionEntrypoints": [
+        "/client"
+      ],
+      "verificationEntrypoints": [
+        "npm run test:e2e"
+      ],
+      "notes": "Portal access, catalog visibility, and client-scoped surfaces are a high-sensitivity isolation boundary."
+    },
+    {
+      "id": "node.aiAssist",
+      "label": "AI assistance",
+      "role": "service",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.sharedDomain"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "summary",
+        "reply draft",
+        "extraction",
+        "risk flag"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": false
+      },
+      "effectiveLoad": {
+        "percent": 3.8,
+        "factorScores": {
+          "codeSurfaceShare": 3,
+          "dependencyCentrality": 4,
+          "fanInFanOutPressure": 3,
+          "affectedRadius": 4,
+          "changeFrequency": 3,
+          "runtimeCriticality": 3,
+          "verificationSpan": 4,
+          "hiddenStateRisk": 3
+        }
+      },
+      "dispersionReadiness": {
+        "score": 78,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/modules/ai"
+      ],
+      "executionEntrypoints": [
+        "/app/inbox"
+      ],
+      "verificationEntrypoints": [
+        "npm run test"
+      ],
+      "notes": "Default adapter is deterministic and local. Real-provider adapters remain optional."
+    },
+    {
+      "id": "node.observability",
+      "label": "Observability",
+      "role": "platform",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.identityTenant",
+        "node.sharedDomain"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "structured logs",
+        "metrics",
+        "trace export",
+        "exception capture",
+        "sanitization"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": true
+      },
+      "effectiveLoad": {
+        "percent": 4.9,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 5,
+          "fanInFanOutPressure": 4,
+          "affectedRadius": 5,
+          "changeFrequency": 4,
+          "runtimeCriticality": 5,
+          "verificationSpan": 5,
+          "hiddenStateRisk": 5
+        }
+      },
+      "dispersionReadiness": {
+        "score": 73,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/shared/observability",
+        "src/instrumentation.ts",
+        "src/instrumentation-client.ts",
+        "src/app/api/observability"
+      ],
+      "executionEntrypoints": [
+        "src/instrumentation.ts",
+        "src/instrumentation-client.ts"
+      ],
+      "verificationEntrypoints": [
+        "npm run test",
+        "npm run evidence:full"
+      ],
+      "notes": "Owns repo-local logs, metrics, trace artifacts, correlation context, and sanitized runtime metadata."
+    },
+    {
+      "id": "node.evidenceOps",
+      "label": "Evidence and Oracle packaging",
+      "role": "platform",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [
+        "node.observability",
+        "node.shell",
+        "node.customerGraph",
+        "node.inbox",
+        "node.lifecycle",
+        "node.automation",
+        "node.scheduling",
+        "node.revenue",
+        "node.portal"
+      ],
+      "observedDependencies": [],
+      "verificationScope": [
+        "evidence runs",
+        "state snapshots",
+        "oracle bundle",
+        "proof matrix updates"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": false
+      },
+      "effectiveLoad": {
+        "percent": 4.6,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 4,
+          "fanInFanOutPressure": 4,
+          "affectedRadius": 5,
+          "changeFrequency": 4,
+          "runtimeCriticality": 4,
+          "verificationSpan": 5,
+          "hiddenStateRisk": 3
+        }
+      },
+      "dispersionReadiness": {
+        "score": 76,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "scripts/evidence",
+        "scripts/oracle",
+        "artifacts/runs",
+        "artifacts/oracle",
+        "docs/for-oracle-to-read.md"
+      ],
+      "executionEntrypoints": [
+        "npm run evidence:full",
+        "npm run verify:accountable",
+        "npm run oracle:bundle"
+      ],
+      "verificationEntrypoints": [
+        "npm run verify:accountable",
+        "npm run oracle:bundle"
+      ],
+      "notes": "Owns accountable run orchestration, catalog proof emission, and curated Oracle handoff packaging."
+    },
+    {
+      "id": "node.sharedUi",
+      "label": "Shared UI system",
+      "role": "shared",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [],
+      "observedDependencies": [],
+      "verificationScope": [
+        "primitives",
+        "theme",
+        "visual language"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": false,
+        "hotspot": true
+      },
+      "effectiveLoad": {
+        "percent": 4.9,
+        "factorScores": {
+          "codeSurfaceShare": 4,
+          "dependencyCentrality": 5,
+          "fanInFanOutPressure": 5,
+          "affectedRadius": 5,
+          "changeFrequency": 5,
+          "runtimeCriticality": 4,
+          "verificationSpan": 4,
+          "hiddenStateRisk": 3
+        }
+      },
+      "dispersionReadiness": {
+        "score": 73,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": true,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": true,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/shared/ui",
+        "src/shared/styles"
+      ],
+      "executionEntrypoints": [
+        "src/app/globals.css"
+      ],
+      "verificationEntrypoints": [
+        "npm run build"
+      ],
+      "notes": "Shared components, tokens, and consistent interaction design."
+    },
+    {
+      "id": "node.sharedDomain",
+      "label": "Shared domain and infrastructure",
+      "role": "shared",
+      "parentId": null,
+      "childIds": [],
+      "declaredDependencies": [],
+      "observedDependencies": [],
+      "verificationScope": [
+        "schema",
+        "repos",
+        "validators",
+        "seed support"
+      ],
+      "status": {
+        "exceptionalNode": false,
+        "splitCandidate": true,
+        "hotspot": true
+      },
+      "effectiveLoad": {
+        "percent": 5,
+        "factorScores": {
+          "codeSurfaceShare": 5,
+          "dependencyCentrality": 5,
+          "fanInFanOutPressure": 5,
+          "affectedRadius": 5,
+          "changeFrequency": 5,
+          "runtimeCriticality": 5,
+          "verificationSpan": 5,
+          "hiddenStateRisk": 5
+        }
+      },
+      "dispersionReadiness": {
+        "score": 68,
+        "contractsExplicit": true,
+        "localizedTests": true,
+        "isolatedSideEffects": false,
+        "stablePublicSurface": true,
+        "minimalHiddenMutableState": false,
+        "clearResponsibility": true
+      },
+      "pathHints": [
+        "src/shared/domain",
+        "src/shared/server",
+        "prisma"
+      ],
+      "executionEntrypoints": [
+        "npm run db:setup"
+      ],
+      "verificationEntrypoints": [
+        "npm run typecheck",
+        "npm run test"
+      ],
+      "notes": "Expected to be closely watched for centralization pressure as the app grows."
+    }
+  ],
+  "edges": [
+    { "from": "node.shell", "to": "node.identityTenant", "type": "declaredDependency" },
+    { "from": "node.shell", "to": "node.sharedUi", "type": "declaredDependency" },
+    { "from": "node.shell", "to": "node.sharedDomain", "type": "declaredDependency" },
+    { "from": "node.customerGraph", "to": "node.identityTenant", "type": "declaredDependency" },
+    { "from": "node.customerGraph", "to": "node.catalog", "type": "declaredDependency" },
+    { "from": "node.customerGraph", "to": "node.sharedDomain", "type": "declaredDependency" },
+    { "from": "node.catalog", "to": "node.identityTenant", "type": "declaredDependency" },
+    { "from": "node.catalog", "to": "node.sharedDomain", "type": "declaredDependency" },
+    { "from": "node.catalog", "to": "node.sharedUi", "type": "declaredDependency" },
+    { "from": "node.inbox", "to": "node.customerGraph", "type": "declaredDependency" },
+    { "from": "node.inbox", "to": "node.aiAssist", "type": "declaredDependency" },
+    { "from": "node.lifecycle", "to": "node.catalog", "type": "declaredDependency" },
+    { "from": "node.lifecycle", "to": "node.customerGraph", "type": "declaredDependency" },
+    { "from": "node.lifecycle", "to": "node.automation", "type": "declaredDependency" },
+    { "from": "node.automation", "to": "node.lifecycle", "type": "declaredDependency" },
+    { "from": "node.automation", "to": "node.catalog", "type": "declaredDependency" },
+    { "from": "node.automation", "to": "node.scheduling", "type": "declaredDependency" },
+    { "from": "node.automation", "to": "node.revenue", "type": "declaredDependency" },
+    { "from": "node.scheduling", "to": "node.catalog", "type": "declaredDependency" },
+    { "from": "node.scheduling", "to": "node.customerGraph", "type": "declaredDependency" },
+    { "from": "node.scheduling", "to": "node.automation", "type": "declaredDependency" },
+    { "from": "node.revenue", "to": "node.catalog", "type": "declaredDependency" },
+    { "from": "node.revenue", "to": "node.customerGraph", "type": "declaredDependency" },
+    { "from": "node.revenue", "to": "node.automation", "type": "declaredDependency" },
+    { "from": "node.portal", "to": "node.catalog", "type": "declaredDependency" },
+    { "from": "node.portal", "to": "node.identityTenant", "type": "declaredDependency" },
+    { "from": "node.portal", "to": "node.inbox", "type": "declaredDependency" },
+    { "from": "node.portal", "to": "node.scheduling", "type": "declaredDependency" },
+    { "from": "node.portal", "to": "node.revenue", "type": "declaredDependency" },
+    { "from": "node.aiAssist", "to": "node.sharedDomain", "type": "declaredDependency" },
+    { "from": "node.observability", "to": "node.identityTenant", "type": "declaredDependency" },
+    { "from": "node.observability", "to": "node.sharedDomain", "type": "declaredDependency" },
+    { "from": "node.evidenceOps", "to": "node.observability", "type": "declaredDependency" },
+    { "from": "node.evidenceOps", "to": "node.shell", "type": "declaredDependency" },
+    { "from": "node.evidenceOps", "to": "node.customerGraph", "type": "declaredDependency" },
+    { "from": "node.evidenceOps", "to": "node.inbox", "type": "declaredDependency" },
+    { "from": "node.evidenceOps", "to": "node.lifecycle", "type": "declaredDependency" },
+    { "from": "node.evidenceOps", "to": "node.automation", "type": "declaredDependency" },
+    { "from": "node.evidenceOps", "to": "node.scheduling", "type": "declaredDependency" },
+    { "from": "node.evidenceOps", "to": "node.revenue", "type": "declaredDependency" },
+    { "from": "node.evidenceOps", "to": "node.portal", "type": "declaredDependency" }
+  ],
+  "integrity": {
+    "declaredObservedDriftScore": 0,
+    "cyclesPresent": true,
+    "lastTopologyReview": "2026-04-13",
+    "lastSanlockReview": "2026-04-13"
+  }
+}

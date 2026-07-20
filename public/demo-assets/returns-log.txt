@@ -1,0 +1,5 @@
+Horizon returns log
+
+- Shipment 4832: damaged packaging
+- Shipment 4837: missing components
+- Open issue: replacement ETA and credit review
